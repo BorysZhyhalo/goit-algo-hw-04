@@ -3,17 +3,20 @@ import argparse
 import shutil
 
 
-def copy_files(source_dir: Path, output_dir: Path):
+def copy_files(source_dir: Path, output_dir: Path) -> None:
     for item in source_dir.iterdir():
         try:
             if item.is_dir():
+                # Рекурсивно обходимо всі вкладені директорії.
                 copy_files(item, output_dir)
             elif item.is_file():
+                # Використовуємо розширення файлу як назву піддиректорії.
                 extension = item.suffix[1:] if item.suffix else "no_extension"
 
                 target_dir = output_dir / extension
                 target_dir.mkdir(parents=True, exist_ok=True)
 
+                # Копіюємо файл у відповідну папку, зберігаючи його метадані.
                 shutil.copy2(item, target_dir / item.name)
 
         except PermissionError:
@@ -22,7 +25,7 @@ def copy_files(source_dir: Path, output_dir: Path):
             print(f"Помилка під час обробки {item}: {error}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("source", help="Шлях до вихідної директорії")
     parser.add_argument("destination", nargs="?", default="dist", help="Шлях до директорії призначення")
@@ -36,6 +39,7 @@ def main():
         print("Вихідна директорія не існує або не є директорією")
         return
 
+    # Створюємо директорію призначення, якщо її ще немає.
     output_dir.mkdir(parents=True, exist_ok=True)
 
     copy_files(source_dir, output_dir)
